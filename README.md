@@ -5,3 +5,7 @@
 # what is
 
 - not a political statement, just dumb fun
+
+# to run
+
+$cargo run --release
