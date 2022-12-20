@@ -20,12 +20,9 @@
 - score on end screen?
 - please stop working on this
 
-# music
+# assets
 
-- title
-- play
-- gameover
-- win sound
+- ai generated or zero rights stuff
 
 # sounds
 
