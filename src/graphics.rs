@@ -428,6 +428,15 @@ pub fn render_game_over(screen: &mut RaylibDrawHandle, graphics: &mut Graphics, 
                 Color::WHITE,
             );
 
+            let num_days_text = format!("You grew for {} days", state.score as i32);
+            d.draw_text(
+                &num_days_text,
+                screen_center.x as i32,
+                screen_center.y as i32 - 60,
+                30,
+                Color::MAROON,
+            );
+
             // a bit under that draw "press [space]"
             let press_space = "Press [space] to be born again";
             let press_space_size =
