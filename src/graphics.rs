@@ -61,7 +61,7 @@ impl Graphics {
             "backdrop",
         ];
         for name in texture_names {
-            let path = format!("assets/{}.png", name);
+            let path = format!("assets/images/{}.png", name);
             let texture = rl.load_texture(rlt, &path).expect(texture_error);
             textures.push(texture);
         }
@@ -320,15 +320,43 @@ pub fn render_flesh_tunnel_segment(
 }
 
 pub fn render_playing(screen: &mut RaylibDrawHandle, graphics: &mut Graphics, state: &mut State) {
-    graphics.camera.zoom = 1.4 + state.player.vel.y * 0.015;
+    graphics.camera.zoom = 1.4 - state.player.vel.x * 0.015;
     let screen_center = (graphics.dims / 2).as_vec2();
-    graphics.camera.target =
-        raylib::math::Vector2::new(state.player.pos.x as f32, state.player.pos.y as f32);
+    // cam target should be about a quarter screen south and right of the player
+    let mut cam_target = state.player.pos.as_vec2();
+    cam_target.x += screen_center.x * 0.25;
+    // cam_target.y += screen_center.y * 0.25;
+    graphics.camera.target = raylib::math::Vector2::new(cam_target.x as f32, cam_target.y as f32);
     graphics.camera.offset = raylib::math::Vector2::new(screen_center.x, screen_center.y);
-    graphics.camera.rotation = state.player.vel.y * 0.3;
+    graphics.camera.rotation = 45.0 + state.player.vel.y * 0.3;
+
+    // fill the background with a static pic of
+    let backdrop_texture = &graphics.textures[Textures::Backdrop as usize];
+    let backdrop_size = graphics.dims;
+    let backdrop_pos = IVec2::new(0, 0);
+    screen.draw_texture_pro(
+        backdrop_texture,
+        Rectangle::new(
+            0.0,
+            0.0,
+            backdrop_texture.width() as f32,
+            backdrop_texture.height() as f32,
+        ),
+        Rectangle::new(
+            backdrop_pos.x as f32,
+            backdrop_pos.y as f32,
+            backdrop_size.x as f32,
+            backdrop_size.y as f32,
+        ),
+        Vector2::new(0.0, 0.0),
+        0.0,
+        Color::WHITE,
+    );
+
     {
         let mut d = screen.begin_mode2D(graphics.camera);
         {
+            // actually render the level
             render_flesh_tunnel(&mut d, graphics, state);
             state.player.render(&mut d, graphics);
             for obstacle in &mut state.obstacles {

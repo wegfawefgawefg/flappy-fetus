@@ -12,7 +12,7 @@ pub struct Player {
 
 impl Player {
     pub const SIZE: UVec2 = UVec2::new(32, 32);
-    pub const STARTING_SPEED: f32 = 2.0;
+    pub const STARTING_SPEED: f32 = 10.0;
 
     pub fn new(pos: IVec2) -> Player {
         Player {

@@ -9,31 +9,50 @@ pub const SPACE_RADIUS: i32 = 400;
 pub const CEILING_POS: i32 = -SPACE_RADIUS;
 pub const FLOOR_POS: i32 = SPACE_RADIUS;
 
-pub const SCIZORS_AHEAD_SPAWN_DISTANCE: i32 = 400;
+pub const SCIZORS_AHEAD_SPAWN_DISTANCE: i32 = 800;
 
 use crate::{
+    audio::{Audio, Song},
     collisions::{is_intersection, Bounded},
     obstacle::Obstacle,
     player::Player,
     state::{Mode, State},
 };
 
-pub fn step(rl: &mut RaylibHandle, rlt: &mut RaylibThread, state: &mut State) {
+pub fn step(rl: &mut RaylibHandle, rlt: &mut RaylibThread, state: &mut State, audio: &mut Audio) {
     let dt = rl.get_frame_time();
     state.time_since_last_update += dt;
     while state.time_since_last_update > TIMESTEP {
         match state.mode {
-            Mode::Title => step_title(rl, rlt, state),
-            Mode::Playing => step_playing(rl, rlt, state),
-            Mode::GameOver => step_game_over(rl, rlt, state),
+            Mode::Title => step_title(rl, rlt, state, audio),
+            Mode::Playing => step_playing(rl, rlt, state, audio),
+            Mode::GameOver => step_game_over(rl, rlt, state, audio),
         }
         state.time_since_last_update -= TIMESTEP;
     }
 }
 
-pub fn step_title(rl: &mut RaylibHandle, rlt: &mut RaylibThread, state: &mut State) {}
+pub fn step_title(
+    rl: &mut RaylibHandle,
+    rlt: &mut RaylibThread,
+    state: &mut State,
+    audio: &mut Audio,
+) {
+    audio
+        .rl_audio_device
+        .update_music_stream(&mut audio.songs[Song::Title as usize]);
+}
 
-pub fn step_playing(rl: &mut RaylibHandle, rlt: &mut RaylibThread, state: &mut State) {
+pub fn step_playing(
+    rl: &mut RaylibHandle,
+    rlt: &mut RaylibThread,
+    state: &mut State,
+    audio: &mut Audio,
+) {
+    audio
+        .rl_audio_device
+        .update_music_stream(&mut audio.songs[Song::Playing as usize]);
+
     let player = &mut state.player;
 
     player.vel.y += GRAVITY;
@@ -41,6 +60,9 @@ pub fn step_playing(rl: &mut RaylibHandle, rlt: &mut RaylibThread, state: &mut S
     player.vel.x += 0.01;
 
     if (player.pos.y + Player::SIZE.y as i32) > FLOOR_POS as i32 || player.pos.y < CEILING_POS {
+        let current_song = &mut audio.songs[Song::GameOver as usize];
+        audio.rl_audio_device.stop_music_stream(current_song);
+        audio.rl_audio_device.play_music_stream(current_song);
         state.mode = Mode::GameOver;
     }
 
@@ -73,6 +95,9 @@ pub fn step_playing(rl: &mut RaylibHandle, rlt: &mut RaylibThread, state: &mut S
         let obstacle_bounds = obstacle.get_bounds();
         if is_intersection(&player_bounds, &obstacle_bounds) {
             state.mode = Mode::GameOver;
+            let current_song = &mut audio.songs[Song::GameOver as usize];
+            audio.rl_audio_device.stop_music_stream(current_song);
+            audio.rl_audio_device.play_music_stream(current_song);
         }
     }
 }
@@ -81,4 +106,13 @@ pub fn should_remove_obstacle(obstacle: &Obstacle, player: &Player) -> bool {
     obstacle.pos.x < player.pos.x - SCIZORS_AHEAD_SPAWN_DISTANCE
 }
 
-pub fn step_game_over(rl: &mut RaylibHandle, rlt: &mut RaylibThread, state: &mut State) {}
+pub fn step_game_over(
+    rl: &mut RaylibHandle,
+    rlt: &mut RaylibThread,
+    state: &mut State,
+    audio: &mut Audio,
+) {
+    audio
+        .rl_audio_device
+        .update_music_stream(&mut audio.songs[Song::GameOver as usize]);
+}
