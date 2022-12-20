@@ -23,10 +23,15 @@ pub struct Graphics {
 impl Graphics {
     pub fn new(rl: &mut RaylibHandle, rlt: &RaylibThread) -> Self {
         let window_dims = UVec2::new(1280, 720);
+        // let window_dims = UVec2::new(1280, 720);
         let dims = UVec2::new(1280, 720);
 
-        rl.set_window_size(dims.x as i32, dims.y as i32);
+        // rl.set_window_size(dims.x as i32, dims.y as i32);
+        rl.set_window_size(window_dims.x as i32, window_dims.y as i32);
+        // enable resizable window
+        // rl.set_window_resizable(true);
         // fullscreen
+        // choose screen
         // rl.toggle_fullscreen();
 
         // after resetting the window size, we should recenter it or its gonna be in a weird place on the screen
@@ -107,7 +112,7 @@ pub fn render(
 
     match state.mode {
         crate::state::Mode::Playing => {
-            // render_playing_debug_info(&mut screen, graphics, state);
+            render_playing_debug_info(&mut screen, graphics, state);
             render_score(&mut screen, graphics, state);
         }
         _ => {}
@@ -320,7 +325,9 @@ pub fn render_flesh_tunnel_segment(
 }
 
 pub fn render_playing(screen: &mut RaylibDrawHandle, graphics: &mut Graphics, state: &mut State) {
-    graphics.camera.zoom = 1.4 - state.player.vel.x * 0.015;
+    graphics.camera.zoom = 4.0 - state.player.vel.x * 0.1;
+    // graphics.camera.zoom = 1.4 - state.player.vel.x * 0.015;
+    graphics.camera.zoom = graphics.camera.zoom.max(0.85);
     let screen_center = (graphics.dims / 2).as_vec2();
     // cam target should be about a quarter screen south and right of the player
     let mut cam_target = state.player.pos.as_vec2();
@@ -449,7 +456,7 @@ pub fn render_playing_debug_info(
     // put cam at 0,0
     let mut print_height = 0;
     let mouse_pos = screen.get_mouse_position();
-    screen.draw_circle_v(mouse_pos, 20.0, Color::RED);
+    // screen.draw_circle_v(mouse_pos, 20.0, Color::RED);
 
     // print mouse pos
     let mouse_pos = screen.get_mouse_position();
@@ -499,11 +506,50 @@ pub fn render_playing_debug_info(
     );
     print_height += 20;
 
-    let mouse_room_frac = mp / graphics.window_dims.as_vec2();
+    // let mouse_room_frac = mp / graphics.window_dims.as_vec2();
+    // screen.draw_text(
+    //     &format!(
+    //         "Mouse Room Frac: ({}, {})",
+    //         mouse_room_frac.x, mouse_room_frac.y
+    //     ),
+    //     0,
+    //     print_height,
+    //     20,
+    //     Color::WHITE,
+    // );
+    // print_height += 20;
+
+    // // print the player velocity
+    // screen.draw_text(
+    //     &format!(
+    //         "Player Velocity: ({}, {})",
+    //         state.player.vel.x, state.player.vel.y
+    //     ),
+    //     0,
+    //     print_height,
+    //     20,
+    //     Color::WHITE,
+    // );
+    // print_height += 20;
+
+    // // print the player position
+    // screen.draw_text(
+    //     &format!(
+    //         "Player Position: ({}, {})",
+    //         state.player.pos.x, state.player.pos.y
+    //     ),
+    //     0,
+    //     print_height,
+    //     20,
+    //     Color::WHITE,
+    // );
+    // print_height += 20;
+
+    // print current scizors spawn frequency
     screen.draw_text(
         &format!(
-            "Mouse Room Frac: ({}, {})",
-            mouse_room_frac.x, mouse_room_frac.y
+            "frames per scizor spawn: {}",
+            state.obstacle_spawn_period_in_frames,
         ),
         0,
         print_height,
@@ -512,12 +558,9 @@ pub fn render_playing_debug_info(
     );
     print_height += 20;
 
-    // print the player velocity
+    // print play time
     screen.draw_text(
-        &format!(
-            "Player Velocity: ({}, {})",
-            state.player.vel.x, state.player.vel.y
-        ),
+        &format!("play time: {}", state.play_time as i32,),
         0,
         print_height,
         20,
@@ -525,12 +568,9 @@ pub fn render_playing_debug_info(
     );
     print_height += 20;
 
-    // print the player position
+    // print cam zoom
     screen.draw_text(
-        &format!(
-            "Player Position: ({}, {})",
-            state.player.pos.x, state.player.pos.y
-        ),
+        &format!(": {}", graphics.camera.zoom,),
         0,
         print_height,
         20,

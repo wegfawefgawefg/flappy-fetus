@@ -1,4 +1,4 @@
-use glam::{IVec2, UVec2};
+use glam::{IVec2, UVec2, Vec2};
 use raylib::prelude::*;
 
 use crate::{
@@ -8,14 +8,15 @@ use crate::{
 
 pub struct Obstacle {
     pub pos: IVec2,
+    pub vel: Vec2,
     pub size: UVec2,
 }
 
 impl Obstacle {
     pub const SIZE: UVec2 = UVec2::new(64, 32);
 
-    pub fn new(pos: IVec2, size: UVec2) -> Obstacle {
-        Obstacle { pos, size }
+    pub fn new(pos: IVec2, size: UVec2, vel: Vec2) -> Obstacle {
+        Obstacle { pos, size, vel }
     }
 
     pub fn render(&mut self, d: &mut RaylibMode2D<RaylibDrawHandle>, graphics: &mut Graphics) {

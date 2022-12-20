@@ -28,7 +28,7 @@ pub struct State {
 }
 
 impl State {
-    pub const STARTING_OBSTACLE_SPAWN_FRAME_PERIOD: u32 = 1 * step::FRAMES_PER_SECOND;
+    pub const STARTING_OBSTACLE_SPAWN_FRAME_PERIOD: u32 = 20;
     pub fn new() -> State {
         State {
             mode: Mode::Title,
@@ -51,6 +51,7 @@ impl State {
     }
 
     pub fn reset(&mut self) {
+        self.play_time = 0.0;
         self.player.pos = IVec2 { x: 0, y: 0 };
         self.player.vel = Vec2 {
             x: Player::STARTING_SPEED,
