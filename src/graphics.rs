@@ -112,7 +112,7 @@ pub fn render(
 
     match state.mode {
         crate::state::Mode::Playing => {
-            render_playing_debug_info(&mut screen, graphics, state);
+            // render_playing_debug_info(&mut screen, graphics, state);
             render_score(&mut screen, graphics, state);
         }
         _ => {}
