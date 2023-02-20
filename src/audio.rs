@@ -7,6 +7,7 @@ pub enum Song {
     Playing,
 }
 
+#[derive(Copy, Clone)]
 pub enum SoundEffect {
     SmackOne,
     SmackTwo,
